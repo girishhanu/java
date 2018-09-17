@@ -1,0 +1,3 @@
+$.post('<%=request.getContextPath()%>/loadBankNames.action?cityId='+cityId+'&branchId='+branchId,
+					function(result) {
+          }
