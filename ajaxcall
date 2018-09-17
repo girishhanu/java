@@ -1,3 +1,65 @@
 $.post('<%=request.getContextPath()%>/loadBankNames.action?cityId='+cityId+'&branchId='+branchId,
 					function(result) {
           }
+
+
+public String getAllConsigneeList() {
+		logger.info("In [" + logTd.getStackTrace()[1].getClassName() + "]["
+				+ logTd.getStackTrace()[1].getMethodName() + "]");
+		List list=null;
+		try {
+			PrintWriter out = response.getWriter();
+			session=ActionContext.getContext().getSession();
+			response.setContentType("text/xml;charset=UTF-8");               
+			int limit =Integer.parseInt(request.getParameter("rows"));
+			int page = Integer.parseInt(request.getParameter("page")); 
+			String sidx = request.getParameter("sidx"); 
+			String sord = request.getParameter("sord");
+			JQGridUtil jqgridUtil = JQGridUtil.getJQGridUtilObj();//Initialize JQGridUtil
+			String searchStr=jqgridUtil.searchInGrid(request);//Get the search string to perform search operation
+			System.out.println("searchStr->"+searchStr);
+			System.out.println("data"+request.getParameter("searchString"));
+			
+			double totalPages = 0;
+			long count=getConsigneeCodeCount(searchStr);
+			if( count >0 ) {
+				if (count%limit == 0) {
+					totalPages = count /limit;
+				} else {
+					totalPages = (count / limit) + 1;
+				}
+			}else{
+				totalPages=0;
+			}
+			if (page > totalPages) 
+				page=(int)totalPages; 
+			int start = limit*page - limit; // do not put $limit*($page - 1)
+			list=getConsigneeCodeDetails(sidx,sord,start,limit,searchStr);
+			out.print("<?xml version='1.0' encoding='utf-8'?>\n");
+			out.print("<rows>");
+			out.print("<page>" + page + "</page>");
+			out.print("<total>" + totalPages + "</total>");
+			out.print("<records>" + count + "</records>");
+			System.out.println("list--->."+list.size());
+			
+			for(int i=0;i<list.size();i++){
+				Object [] val = (Object [])list.get(i);
+				out.print("<row id='" + i + "'>");
+				out.print("<cell>"+removeAllUnwantedCharacters(val[0])+"</cell>");               
+				out.print("<cell>"+removeAllUnwantedCharacters(val[1])+"</cell>");
+				out.print("<cell>"+removeAllUnwantedCharacters(val[2])+"</cell>");
+				out.print("</row>");
+			}
+			out.print("</rows>");
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			logger.error(
+					"[errorHandling] " + "["
+							+ logTd.getStackTrace()[1].getClassName() + "] "
+							+ "[" + logTd.getStackTrace()[1].getMethodName()
+							+ "] [exception]", e);
+		}
+		return null;
+	}
