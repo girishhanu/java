@@ -63,3 +63,19 @@ public String getAllConsigneeList() {
 		}
 		return null;
 	}
+	
+	
+	public String removeAllUnwantedCharacters(Object obj)
+	 {
+		 String s="";
+		 if(obj!=null)	
+		 { 
+			s=obj.toString();
+			s=s.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+			s=s.replaceAll("[^\\p{ASCII}]", "");
+			s = s.replaceAll("[^\\x00-\\x7F]", "");
+			s=StringEscapeUtils.escapeHtml(s);
+			s = Normalizer.normalize(s, Normalizer.Form.NFD);
+		}
+		 return s;
+	 }
